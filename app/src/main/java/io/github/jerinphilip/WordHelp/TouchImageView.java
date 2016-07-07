@@ -43,25 +43,20 @@ public class TouchImageView extends ImageView {
     boolean frozen = false;
     int xs, ys, xe, ye;
 
-    private int brushColor = Color.BLUE;
-    private int strokeWidth = 6;
     Context context;
 
     Paint paint = new Paint();
 
     public TouchImageView(Context context) {
         super(context);
-        paint.setColor(brushColor);
-        paint.setStrokeWidth(strokeWidth);
+        paint.setColor(Color.GREEN);
+        paint.setStrokeWidth(5);
         sharedConstructing(context);
         reset();
     }
 
     public TouchImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        paint.setColor(brushColor);
-        paint.setStrokeWidth(strokeWidth);
-
         sharedConstructing(context);
         reset();
     }
@@ -282,8 +277,8 @@ public class TouchImageView extends ImageView {
         frozen = false;
 
     }
-
     /*
+
     @Override
     public Parcelable onSaveInstanceState()
     {
@@ -305,6 +300,6 @@ public class TouchImageView extends ImageView {
         }
         super.onRestoreInstanceState(state);
     }
-    */
 
+    */
 }
