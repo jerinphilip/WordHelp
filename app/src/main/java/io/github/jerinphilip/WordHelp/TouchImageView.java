@@ -46,17 +46,21 @@ public class TouchImageView extends ImageView {
     Context context;
 
     Paint paint = new Paint();
+    private int brushColor = Color.BLUE;
+    private int strokeWidth = 10;
 
     public TouchImageView(Context context) {
         super(context);
-        paint.setColor(Color.GREEN);
-        paint.setStrokeWidth(5);
+        paint.setColor(brushColor);
+        paint.setStrokeWidth(strokeWidth);
         sharedConstructing(context);
         reset();
     }
 
     public TouchImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        paint.setColor(brushColor);
+        paint.setStrokeWidth(strokeWidth);
         sharedConstructing(context);
         reset();
     }
