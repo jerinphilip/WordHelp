@@ -1,10 +1,14 @@
 package io.github.jerinphilip.WordHelp;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.os.Bundle;
 
@@ -16,12 +20,28 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 
 public class MainActivity extends AppCompatActivity {
     private ImageHandle iH = new ImageHandle();
+    private ProgressDialog progress;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private Uri fileUri;
     private Bitmap ImageCaptured;
@@ -52,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
                 cropRect();
                 return true;
             case R.id.action_confirm:
+                //sendImage();
+                uploadImage();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -93,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         outState.putParcelable("fileUri", fileUri);
     }
 
@@ -127,4 +148,73 @@ public class MainActivity extends AppCompatActivity {
         img.setImageBitmap(rBmp);
         ImageCaptured = rBmp;
     }
+
+    public void uploadImage() {
+
+        String serverUrl = "http://preon.iiit.ac.in/~heritage/anstuff/";
+        final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
+
+        OkHttpClient client = new OkHttpClient();
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("email", "Jurassic@Park.com")
+                .add("tel", "90301171XX")
+                .build();
+
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("test", "test_value")
+                .addFormDataPart("bitmap", "bitmap.jpg",
+                        RequestBody.create(MEDIA_TYPE_JPG, getImageBinary())
+                ).build();
+
+        Request request = new Request.Builder()
+                .url(serverUrl)
+                .post(requestBody)
+                .build();
+
+        Call call = client.newCall(request);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Toast.makeText(MainActivity.this, "Aaaaand you failed", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final Response resp = response;
+                final String output = resp.body().string();
+                //Log.v(TAG, resp);
+                if (response.isSuccessful()) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String s = resp.code() + " (" + resp.message() + ")";
+                            Toast.makeText(MainActivity.this, "Success!!!", Toast.LENGTH_LONG).show();
+                            Log.d("response", output);
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "Failure!!!", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+
+    public byte[] getImageBinary() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageCaptured.compress(Bitmap.CompressFormat.PNG,100,baos);
+        byte[] imageBytes = baos.toByteArray();
+        return imageBytes;
+
+    }
+
 }
+

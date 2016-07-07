@@ -142,8 +142,11 @@ public class TouchImageView extends ImageView {
     protected void  onDraw(Canvas canvas){
         super.onDraw(canvas);
         // Draw the lines
-        if(frozen)
-            canvas.drawLine(start.x, start.y, last.x, last.y, paint);
+        if(frozen) {
+            //canvas.drawLine(start.x, start.y, last.x, last.y, paint);
+            paint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(start.x, start.y, last.x, last.y, paint);
+        }
 
     }
 
