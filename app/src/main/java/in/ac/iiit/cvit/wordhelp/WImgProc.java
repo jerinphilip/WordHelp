@@ -22,8 +22,19 @@ public class WImgProc {
         Mat img = new Mat();
         Utils.bitmapToMat(bmp, img);
         Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.threshold(img, img, 127, 255, Imgproc.THRESH_OTSU);
+        Imgproc.erode(img, img, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3)));
 
-        img = cropWord(img, swipePath);
+
+        if (swipePath.size() == 1){
+            ArrayList<Point> P = neighbours(swipePath.get(0), img.rows(), img.cols());
+            for(Point p: P){
+                swipePath.add(p);
+            }
+
+        }
+        img = cropOptimized(img, swipePath);
+
 
         bmp = Bitmap.createBitmap(bmp, 0, 0, img.cols(), img.rows());
         Utils.matToBitmap(img, bmp);
@@ -31,66 +42,14 @@ public class WImgProc {
         return bmp;
     }
 
-    public static Mat cropWord(Mat img, ArrayList<Point> path){
-        Rect cropWindow = boundingBox(path, img.cols(), img.rows());
-        Log.d("CropWindow", WUtils.toString(cropWindow));
-        img = new Mat(img, cropWindow);
-        Imgproc.threshold(img, img, 127, 255, Imgproc.THRESH_OTSU);
-        Imgproc.erode(img, img, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3)));
 
-
-        // Adjust points relative to cropped window.
-        for(int i=0; i<path.size(); i++){
-            Point p = path.get(i);
-            path.set(i, new Point(p.x - cropWindow.x, p.y-cropWindow.y));
-
-        }
-        /*
-        // Do a connected component analysis nearby.
-        img = cropSubRoutine(img, path);
-        */
-        return img;
-
-
-    }
-
-    public static Rect boundingBox(ArrayList<Point> path, int W, int H){
-        /* Detects bounding box from path so operations need to be done only there. */
-        int min_x, max_x, min_y, max_y;
-
-        /* Initialize with values. Path should contain at least two points. */
-
-        min_x = path.get(0).x;
-        min_y = path.get(0).y;
-
-        max_x = min_x;
-        max_y = min_y;
-
-        for(Point p: path){
-            min_x = Math.min(min_x, p.x);
-            max_x = Math.max(max_x, p.x);
-
-            min_y = Math.min(min_y, p.y);
-            max_y = Math.max(max_y, p.y);
-        }
-
-        int tolerance = 10;
-        min_x  = Math.max(0, min_x-tolerance);
-        min_y  = Math.max(0, min_y-tolerance);
-
-        max_x  = Math.min(W, max_x+tolerance);
-        max_y  = Math.min(H, max_y+tolerance);
-
-
-        return new Rect(min_x, min_y, max_x-min_x+1, max_y-min_y+1);
-    }
 
     public static ArrayList<Point> neighbours(Point p, int W, int H){
         ArrayList<Point> result = new ArrayList<>();
         int x, y;
         for(int dx=-1; dx<=1; dx++){
             for(int dy=-1; dy<=1; dy++){
-                if(dx!=0 && dy!=0){
+                if(!(dx==0 && dy==0)){
                     x = p.x+dx;
                     y = p.y+dy;
                     if ( x >= 0 && x < W && y >= 0 && y < H){
@@ -102,77 +61,70 @@ public class WImgProc {
         return result;
     }
 
-    public static Mat cropSubRoutine(Mat img, ArrayList<Point> path){
+
+    public static Mat cropOptimized(Mat img, ArrayList<Point> path){
         int H, W;
-        W = img.cols();
-        H = img.rows();
+        H = img.cols();
+        W = img.rows();
 
-        /* Width is no of columns */
-        /* Height is number of rows */
-
-
-        Mat result_img = new Mat(img.size(), img.type());
         int[][] color = new int[H][W];
-        int[][] bImage = roundValues(img);
         int UNTOUCHED = 0, MARKED = 1, VISITED = 2;
 
+        int min_i, max_i, min_j, max_j;
+        min_i = H; min_j = W;
+        max_i = 0; max_j = 0;
 
-        /* Set all to unmarked. */
-        for(int i=0; i<H; i++){
-            for(int j=0; j<W; j++){
-                color[i][j] = UNTOUCHED;
-            }
-        }
+        ArrayList<Point> sparseImage = new ArrayList<>();
 
-
-        /* Prepare for DFS */
         Stack<Point> S;
         S = new Stack<Point>();
-        for (Point touched: path){
+        for(Point p: path){
             int i, j;
-            i = touched.y;
-            j = touched.x;
-            if(bImage[i][j] == 0 &&
-                    color[i][j] == UNTOUCHED){
-                S.push(touched);
+            i = p.y;
+            j = p.x;
+
+            double[] value = img.get(i, j);
+            if((int)value[0] == 0 && color[i][j] == UNTOUCHED){
+                S.push(p);
                 color[i][j] = MARKED;
             }
-            while(!S.empty()){
+
+            while (!S.empty()){
                 Point root = S.pop();
                 i = root.y;
                 j = root.x;
-                //Log.d("Setting Visited", WUtils.toString(new Point(i, j)));
-
+                sparseImage.add(root);
                 color[i][j] = VISITED;
-                double[] value = {255.0};
-                result_img.put(i, j, value);
+                min_i = Math.min(min_i, i);
+                max_i = Math.max(max_i, i);
 
-                for(Point p: neighbours(root, W, H)){
-                    if(bImage[p.y][p.x] == 0 && color[p.y][p.x] == UNTOUCHED){
-                        S.push(p);
-                        color[p.y][p.x] = MARKED;
+                min_j = Math.min(min_j, j);
+                max_j = Math.max(max_j, j);
+
+                //Log.d("Root", WUtils.toString(root));
+                for(Point child: neighbours(root, W, H)){
+                    int ii, jj;
+                    ii = child.y; jj = child.x;
+                    //Log.d("Neighbours", WUtils.toString(child));
+                    double[] childValue = img.get(ii, jj);
+                    if((int)childValue[0] == 0 && color[ii][jj] == UNTOUCHED){
+                        //Log.d("NHit on", WUtils.toString(child));
+                        S.push(child);
+                        color[ii][jj] = MARKED;
                     }
                 }
             }
         }
 
-        return result_img;
-    }
-
-    public static int[][] roundValues(Mat img){
-        int[][] I = new int[img.rows()][img.cols()];
-        //Log.d("Dim:", WUtils.toString(new Point(img.cols(), img.rows())));
-        for(int i=0; i<img.rows(); i++){
-            for(int j=0; j<img.cols(); j++){
-                //Log.d("Dim:", WUtils.toString(new Point(i, j)));
-                I[i][j] = (int)img.get(i, j)[0];
-                //Log.d("Setting: ", WUtils.toString(new Point(i, j)));
-                //
-                // Log.d("Value", String.valueOf(I[i][j]));
-            }
+        //Rect bbox = new Rect(min_i, min_j, max_i - min_i + 1, max_j - min_j + 1);
+        Rect bbox = new Rect(min_j, min_i, max_j - min_j + 1, max_i - min_i + 1);
+        Mat result = new Mat(img.size(), img.type());
+        result = new Mat(result, bbox);
+        double[] white = {255.0};
+        for(Point p: sparseImage){
+            result.put(p.y-min_i, p.x-min_j, white);
         }
-        return I;
+
+        return result;
     }
-
-
 }

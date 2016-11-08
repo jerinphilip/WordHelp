@@ -18,17 +18,16 @@ public class ImageMatrix {
     private Matrix A_inverse;
 
     public ImageMatrix(){
+        /* Hardcoding scale for now. */
+        scale = 1.0f;
+        minScale = 1.0f;
+        maxScale = 5.0f;
         reset();
     }
 
     public void reset(){
         A = new Matrix();
         A_inverse = new Matrix();
-
-        /* Hardcoding scale for now. */
-        scale = 1.0f;
-        minScale = 1.0f;
-        maxScale = 5.0f;
     }
 
     public void fitImage(int viewWidth, int viewHeight, int width, int height){
