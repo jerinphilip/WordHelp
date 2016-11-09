@@ -44,7 +44,6 @@ class WUtils {
 
             max_x = min_x;
             max_y = min_y;
-            boolean first = true;
             for (PointF p : path) {
                 min_x = Math.min(min_x, p.x);
                 max_x = Math.max(max_x, p.x);

@@ -22,12 +22,13 @@ public class ImageMatrix {
         scale = 1.0f;
         minScale = 1.0f;
         maxScale = 5.0f;
-        reset();
+        A = new Matrix();
+        A_inverse = new Matrix();
+        //reset();
     }
 
     public void reset(){
-        A = new Matrix();
-        A_inverse = new Matrix();
+        A.reset();
     }
 
     public void fitImage(int viewWidth, int viewHeight, int width, int height){

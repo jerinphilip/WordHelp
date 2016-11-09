@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -124,8 +125,12 @@ public class MainActivity extends AppCompatActivity {
         //WUtils.debugPoints(path);
         Bitmap result = WImgProc.process(image, path);
         image = result;
-        canvas.resetCanvas();
         canvas.setImageBitmap(result);
+        canvas.resetCanvas();
+
+
+        ImageView alter = (ImageView)findViewById(R.id.second);
+        alter.setImageBitmap(result);
     }
 
 

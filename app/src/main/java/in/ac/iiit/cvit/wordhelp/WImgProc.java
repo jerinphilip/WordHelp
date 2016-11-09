@@ -101,14 +101,11 @@ public class WImgProc {
                 min_j = Math.min(min_j, j);
                 max_j = Math.max(max_j, j);
 
-                //Log.d("Root", WUtils.toString(root));
                 for(Point child: neighbours(root, W, H)){
                     int ii, jj;
                     ii = child.y; jj = child.x;
-                    //Log.d("Neighbours", WUtils.toString(child));
                     double[] childValue = img.get(ii, jj);
                     if((int)childValue[0] == 0 && color[ii][jj] == UNTOUCHED){
-                        //Log.d("NHit on", WUtils.toString(child));
                         S.push(child);
                         color[ii][jj] = MARKED;
                     }
@@ -116,7 +113,6 @@ public class WImgProc {
             }
         }
 
-        //Rect bbox = new Rect(min_i, min_j, max_i - min_i + 1, max_j - min_j + 1);
         Rect bbox = new Rect(min_j, min_i, max_j - min_j + 1, max_i - min_i + 1);
         Mat result = new Mat(img.size(), img.type());
         result = new Mat(result, bbox);

@@ -162,7 +162,7 @@ public class TouchImageView extends ImageView {
         width = image.getIntrinsicWidth();
         height = image.getIntrinsicHeight();
         RectF bbox = WUtils.boundingBox(swipePath, width, height);
-        matrix.A.mapRect(bbox, bbox);
+        //matrix.A.mapRect(bbox, bbox);
         canvas.drawRect(bbox, paint);
     }
 
