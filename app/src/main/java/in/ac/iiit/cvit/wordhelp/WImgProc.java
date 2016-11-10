@@ -33,8 +33,8 @@ public class WImgProc {
             }
 
         }
-        img = cropOptimized(img, swipePath);
-
+        Rect bbox = cropOptimized(img, swipePath);
+        img = new Mat(img, bbox);
 
         bmp = Bitmap.createBitmap(bmp, 0, 0, img.cols(), img.rows());
         Utils.matToBitmap(img, bmp);
@@ -62,7 +62,7 @@ public class WImgProc {
     }
 
 
-    public static Mat cropOptimized(Mat img, ArrayList<Point> path){
+    public static Rect cropOptimized(Mat img, ArrayList<Point> path){
         int H, W;
         H = img.cols();
         W = img.rows();
@@ -121,6 +121,6 @@ public class WImgProc {
             result.put(p.y-min_i, p.x-min_j, white);
         }
 
-        return result;
+        return bbox;
     }
 }

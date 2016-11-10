@@ -5,7 +5,6 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.util.Log;
 
-import android.graphics.Rect;
 
 import java.util.ArrayList;
 
