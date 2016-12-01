@@ -25,6 +25,15 @@ public class WImgProc {
         Imgproc.threshold(img, img, 127, 255, Imgproc.THRESH_OTSU);
         Imgproc.erode(img, img, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3)));
 
+        // Downsample.
+        // Processing is done on an image of size 640x640 tops.
+        double MAX_SIZE = 640;
+        double wScale = MAX_SIZE/(double)img.width();
+        double hScale = MAX_SIZE/(double)img.height();
+
+        double scale = Math.min(wScale, hScale);
+        Log.d("Scale", String.valueOf(scale));
+        Imgproc.resize(img, img, new Size(), scale, scale, Imgproc.INTER_CUBIC);
 
         if (swipePath.size() == 1){
             ArrayList<Point> P = neighbours(swipePath.get(0), img.rows(), img.cols());
@@ -33,9 +42,35 @@ public class WImgProc {
             }
 
         }
-        Rect bbox = cropOptimized(img, swipePath);
-        img = new Mat(img, bbox);
 
+        ArrayList<Point> scaledSwipePath = new ArrayList<>();
+        for(Point p: swipePath){
+            p.x = (int)(p.x*scale);
+            p.y = (int)(p.y*scale);
+            scaledSwipePath.add(p);
+        }
+
+        if (scaledSwipePath.size() == 1){
+            ArrayList<Point> P = neighbours(scaledSwipePath.get(0), img.rows(), img.cols());
+            for(Point p: P){
+                scaledSwipePath.add(p);
+            }
+
+        }
+
+        Rect bbox = cropOptimized(img, scaledSwipePath);
+
+        // Upsample Scale obtained bounding box.
+        bbox.x = (int)(bbox.x/scale);
+        bbox.y = (int)(bbox.y/scale);
+        bbox.width = (int)(bbox.width/scale);
+        bbox.height = (int)(bbox.height/scale);
+
+        Mat original = new Mat();
+        Utils.bitmapToMat(bmp, original);
+        img = new Mat(original, bbox);
+        Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.threshold(img, img, 127, 255, Imgproc.THRESH_OTSU);
         bmp = Bitmap.createBitmap(bmp, 0, 0, img.cols(), img.rows());
         Utils.matToBitmap(img, bmp);
         Log.d("Image Dimensions", WUtils.toString(new Point(img.cols(), img.rows())));
@@ -64,8 +99,8 @@ public class WImgProc {
 
     public static Rect cropOptimized(Mat img, ArrayList<Point> path){
         int H, W;
-        H = img.cols();
-        W = img.rows();
+        H = img.rows();
+        W = img.cols();
 
         int[][] color = new int[H][W];
         int UNTOUCHED = 0, MARKED = 1, VISITED = 2;
@@ -82,7 +117,10 @@ public class WImgProc {
             int i, j;
             i = p.y;
             j = p.x;
+            Log.d("Point", WUtils.toString(p));
+            Log.d("Bounds: (W, H):", WUtils.toString(new Point(W, H)));
 
+            Log.d("Accessing", WUtils.toString(new Point(i, j)));
             double[] value = img.get(i, j);
             if((int)value[0] == 0 && color[i][j] == UNTOUCHED){
                 S.push(p);

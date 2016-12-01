@@ -16,7 +16,7 @@ public class ImageMatrix {
     public Matrix A;
     private float scale, maxScale, minScale;
     private Matrix A_inverse;
-
+    private int viewWidth, viewHeight;
     public ImageMatrix(){
         /* Hardcoding scale for now. */
         scale = 1.0f;
@@ -24,11 +24,9 @@ public class ImageMatrix {
         maxScale = 5.0f;
         A = new Matrix();
         A_inverse = new Matrix();
-        //reset();
     }
 
     public void reset(){
-        A.reset();
     }
 
     public void fitImage(int viewWidth, int viewHeight, int width, int height){

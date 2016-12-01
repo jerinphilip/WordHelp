@@ -10,6 +10,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class ImageHandle {
@@ -59,6 +60,21 @@ public class ImageHandle {
         }
 
         return mediaFile;
+    }
+
+
+    private static ArrayList<File> getImageList(){
+        ArrayList<File> ls = new ArrayList<>();
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "WordHelp");
+        File[] files = mediaStorageDir.listFiles();
+        for(File file: files){
+            if(!file.isDirectory()){
+                ls.add(file);
+            }
+        }
+        return ls;
+
     }
 }
 

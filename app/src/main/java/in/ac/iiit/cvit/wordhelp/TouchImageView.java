@@ -136,8 +136,9 @@ public class TouchImageView extends ImageView {
         swipePath.clear();
         swipe.reset();
         swipePathImage.clear();
-        matrix.reset();
+        matrix = new ImageMatrix();
         setImageMatrix(matrix.A);
+        setScaleType(ScaleType.MATRIX);
         invalidate();
 
     }
@@ -159,6 +160,7 @@ public class TouchImageView extends ImageView {
         int width, height;
         width = image.getIntrinsicWidth();
         height = image.getIntrinsicHeight();
+
         RectF bbox = WUtils.boundingBox(swipePath, width, height);
         //matrix.A.mapRect(bbox, bbox);
         canvas.drawRect(bbox, paint);

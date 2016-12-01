@@ -43,15 +43,14 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 try {
                     sleep(SLEEP*1000);
-
                     if (!launchPreferenceManager.isFirstTimeLaunch()) {
-                        Intent intent_packages_list = new Intent(SplashActivity.this, MainActivity.class);
+                        Intent intent_packages_list = new Intent(SplashActivity.this, HomeActivity.class);
                         intent_packages_list.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent_packages_list);
                         finish();
                     } else {
                         launchPreferenceManager.setFirstTimeLaunch(false);
-                        Intent intent_splash_intro = new Intent(SplashActivity.this, MainActivity.class);
+                        Intent intent_splash_intro = new Intent(SplashActivity.this, HomeActivity.class);
                         intent_splash_intro.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent_splash_intro);
                         finish();
