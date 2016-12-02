@@ -7,12 +7,9 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,29 +17,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
-public class MainActivity extends AppCompatActivity{
+public class CanvasActivity extends AppCompatActivity{
     ImageHandle imageHandle;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private static int MAX_BITMAP_SIZE = 1280;
@@ -73,7 +58,7 @@ public class MainActivity extends AppCompatActivity{
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_canvas);
 
         Bundle bundle = this.getIntent().getExtras();
         if(bundle!= null && bundle.containsKey("imageUri")) {
@@ -107,6 +92,7 @@ public class MainActivity extends AppCompatActivity{
                 height, true);
         return newBitmap;
     }
+
     public Bitmap loadBitmap(Uri fileUri){
         Bitmap ImageCaptured;
         InputStream imageStream = null;
@@ -221,88 +207,14 @@ public class MainActivity extends AppCompatActivity{
         ArrayList<Point> path = canvas.getSwipePathImage();
         Bitmap result = WImgProc.process(image, path);
         croppedImage = result;
-        uploadImage(croppedImage);
+        launchDetails();
     }
 
-    public void launchDetails(String output){
+    public void launchDetails(){
         Intent intent = new Intent(this, InfoActivity.class);
-        intent.putExtra("output", output);
         Bundle bundle = new Bundle();
         bundle.putParcelable("resultImage", croppedImage);
         intent.putExtras(bundle);
         startActivity(intent);
     }
-
-
-    public void uploadImage(Bitmap img) {
-        /* TODO: Make this neater? */
-        String serverUrl = "http://ocr.iiit.ac.in/wordhelp/api.php";
-        final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpg");
-
-        OkHttpClient client = new OkHttpClient();
-
-
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("lang", "Hindi")
-                .addFormDataPart("uploaded_file", "bitmap.jpg",
-                        RequestBody.create(MEDIA_TYPE_JPG, getImageBinary(img))
-                ).build();
-
-        Request request = new Request.Builder()
-                .url(serverUrl)
-                .post(requestBody)
-                .build();
-
-        Call call = client.newCall(request);
-
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                /*Toast.makeText(MainActivity.this, "Aaaaand you failed", Toast.LENGTH_LONG).show();*/
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final Response resp = response;
-                final String output = resp.body().string();
-                //Log.v(TAG, resp);
-                if (response.isSuccessful()) {
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String s = resp.code() + " (" + resp.message() + ")";
-                            Toast.makeText(MainActivity.this, "Success!!!", Toast.LENGTH_LONG).show();
-                            Log.d("response", output);
-                            launchDetails(output);
-
-                        }
-                    });
-
-                } else {
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "Failure!!!", Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                }
-            }
-        });
-    }
-
-
-
-    public byte[] getImageBinary(Bitmap img) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        img.compress(Bitmap.CompressFormat.PNG,100,baos);
-        byte[] imageBytes = baos.toByteArray();
-        return imageBytes;
-
-    }
-
-
 }

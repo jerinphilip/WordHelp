@@ -20,9 +20,6 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 
-/**
- * TODO: document your custom view class.
- */
 public class TouchImageView extends ImageView {
     Context _context;
     ImageMatrix matrix;
@@ -117,7 +114,6 @@ public class TouchImageView extends ImageView {
                         if ( op_mode == DRAW) {
                             swipe.reset();
                             swipe.moveTo(touch.x, touch.y);
-
                             swipePath.clear();
                             swipePath.add(touch);
                         }
@@ -125,6 +121,9 @@ public class TouchImageView extends ImageView {
                             op_mode = DRAW;
                             swipe.reset();
                             swipePath.clear();
+                            swipe.moveTo(touch.x, touch.y);
+                            swipePath.add(touch);
+
                         }
 
                         break;
@@ -134,7 +133,6 @@ public class TouchImageView extends ImageView {
                             PointF scroll = new PointF();
                             scroll.set(getScrollX(), getScrollY());
                             swipePathImage = matrix.ImageViewCoordinates(swipePath, scroll);
-                            //WUtils.debugPoints(Points);
                             if (mChangeListener != null) {
                                 mChangeListener.imageChanged(TouchImageView.this);
                             }
@@ -169,7 +167,6 @@ public class TouchImageView extends ImageView {
         setImageMatrix(matrix.A);
         setScaleType(ScaleType.MATRIX);
         invalidate();
-
     }
 
 

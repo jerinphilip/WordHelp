@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -58,7 +57,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void viewSample(View v){
-        Intent touchImageView = new Intent(this, MainActivity.class);
+        Intent touchImageView = new Intent(this, CanvasActivity.class);
         startActivity(touchImageView);
     }
 
@@ -104,7 +103,7 @@ public class HomeActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("imageUri", imageUri);
-                Intent touchImageview = new Intent(this, MainActivity.class);
+                Intent touchImageview = new Intent(this, CanvasActivity.class);
                 touchImageview.putExtras(bundle);
                 startActivity(touchImageview);
 
@@ -116,7 +115,7 @@ public class HomeActivity extends AppCompatActivity {
                 Bundle bundle = new Bundle();
                 imageUri = data.getData();
                 bundle.putParcelable("imageUri", imageUri);
-                Intent touchImageview = new Intent(this, MainActivity.class);
+                Intent touchImageview = new Intent(this, CanvasActivity.class);
                 touchImageview.putExtras(bundle);
                 startActivity(touchImageview);
             }
