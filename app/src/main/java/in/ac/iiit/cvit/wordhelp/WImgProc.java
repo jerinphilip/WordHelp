@@ -150,15 +150,16 @@ public class WImgProc {
                 }
             }
         }
+        int x, y,  width, height;
+        width = max_j - min_j + 1;
+        height = max_i - min_i + 1;
+        Rect bbox;
+        if ( width > 0 && height > 0)
+            bbox = new Rect(min_j, min_i, max_j - min_j + 1, max_i - min_i + 1);
+        else
+            bbox = new Rect(0, 0, W, H);
 
-        Rect bbox = new Rect(min_j, min_i, max_j - min_j + 1, max_i - min_i + 1);
-        Mat result = new Mat(img.size(), img.type());
-        result = new Mat(result, bbox);
-        double[] white = {255.0};
-        for(Point p: sparseImage){
-            result.put(p.y-min_i, p.x-min_j, white);
-        }
-
+        Log.d("BBOX", WUtils.toString(bbox));
         return bbox;
     }
 }

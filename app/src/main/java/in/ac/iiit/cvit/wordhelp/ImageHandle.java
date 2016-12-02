@@ -63,7 +63,7 @@ public class ImageHandle {
     }
 
 
-    private static ArrayList<File> getImageList(){
+    public static ArrayList<File> getImageList(){
         ArrayList<File> ls = new ArrayList<>();
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "WordHelp");
@@ -71,6 +71,7 @@ public class ImageHandle {
         for(File file: files){
             if(!file.isDirectory()){
                 ls.add(file);
+                Log.d("FILE", file.getName());
             }
         }
         return ls;

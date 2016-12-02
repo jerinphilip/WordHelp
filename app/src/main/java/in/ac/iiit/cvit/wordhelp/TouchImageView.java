@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.text.method.Touch;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -41,6 +42,16 @@ public class TouchImageView extends ImageView {
 
 
     int viewWidth, viewHeight;
+    public interface OnImageChangedListener {
+        public void imageChanged(TouchImageView view);
+    }
+
+    private OnImageChangedListener mChangeListener;
+    public void setOnImageChangedListener(OnImageChangedListener listener) {
+        mChangeListener = listener;
+    }
+
+
 
 
     public TouchImageView(Context context) {
@@ -87,6 +98,7 @@ public class TouchImageView extends ImageView {
         paint.setColor(Color.BLUE);
         paint.setStrokeWidth(strokeWidth);
         paint.setStyle(Paint.Style.STROKE);
+        op_mode = DRAW;
 
 
         /* Listener */
@@ -102,25 +114,42 @@ public class TouchImageView extends ImageView {
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         /* Reset and start path again */
+                        if ( op_mode == DRAW) {
+                            swipe.reset();
+                            swipe.moveTo(touch.x, touch.y);
 
-                        swipe.reset();
-                        swipe.moveTo(touch.x, touch.y);
-
-                        swipePath.clear();
-                        swipePath.add(touch);
+                            swipePath.clear();
+                            swipePath.add(touch);
+                        }
+                        else{
+                            op_mode = DRAW;
+                            swipe.reset();
+                            swipePath.clear();
+                        }
 
                         break;
                     case MotionEvent.ACTION_UP:
                         /* If swipe crop and send. Else send entire image and coordinates. */
-                        PointF scroll = new PointF();
-                        scroll.set(getScrollX(), getScrollY());
-                        swipePathImage = matrix.ImageViewCoordinates(swipePath, scroll);
-                        //WUtils.debugPoints(Points);
+                        if(op_mode == DRAW) {
+                            PointF scroll = new PointF();
+                            scroll.set(getScrollX(), getScrollY());
+                            swipePathImage = matrix.ImageViewCoordinates(swipePath, scroll);
+                            //WUtils.debugPoints(Points);
+                            if (mChangeListener != null) {
+                                mChangeListener.imageChanged(TouchImageView.this);
+                            }
+                        }
+                        else if(op_mode == ZOOM){
+                            swipePath.clear();
+                            swipe.reset();
+                        }
                         break;
                     case MotionEvent.ACTION_MOVE:
                         /* Keep updating path and add points to swipePath */
-                        swipe.lineTo(touch.x, touch.y);
-                        swipePath.add(touch);
+                        if (op_mode == DRAW) {
+                            swipe.lineTo(touch.x, touch.y);
+                            swipePath.add(touch);
+                        }
                         break;
                 }
 
@@ -163,7 +192,7 @@ public class TouchImageView extends ImageView {
 
         RectF bbox = WUtils.boundingBox(swipePath, width, height);
         //matrix.A.mapRect(bbox, bbox);
-        canvas.drawRect(bbox, paint);
+        //canvas.drawRect(bbox, paint);
     }
 
     @Override
@@ -195,6 +224,7 @@ public class TouchImageView extends ImageView {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener{
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector){
+            op_mode = ZOOM;
             return true;
         }
 

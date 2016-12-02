@@ -25,6 +25,7 @@ class WUtils {
                 +", "+String.valueOf(r.height);
     }
 
+
     public static void debugPoints(ArrayList<Point> Points){
         for(Point p: Points){
             Log.d("DebugAlist<P>", toString(p));

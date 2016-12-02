@@ -42,7 +42,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     ImageHandle imageHandle;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private static int MAX_BITMAP_SIZE = 1280;
@@ -79,28 +79,19 @@ public class MainActivity extends AppCompatActivity {
         if(bundle!= null && bundle.containsKey("imageUri")) {
             Uri imageUri = bundle.getParcelable("imageUri");
             image = loadBitmap(imageUri);
-            ExifInterface exif = null;
-            try {
-                exif = new ExifInterface(imageUri.getPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_UNDEFINED);
-            image = rotateBitmap(image, orientation);
-            if(image.getWidth() > MAX_BITMAP_SIZE || image.getHeight() > MAX_BITMAP_SIZE){
-                image = getResizedBitmap(image);
-            }
         }
         else {
             image = ((BitmapDrawable) getDrawable(R.drawable.lorem)).getBitmap();
         }
         canvas = (TouchImageView)findViewById(R.id.canvas);
+        canvas.setOnImageChangedListener(new TouchImageView.OnImageChangedListener() {
+            @Override
+            public void imageChanged(TouchImageView view) {
+                process(view);
+            }
+        });
         canvas.setImageBitmap(image);
-        /*
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
-        */
+
 
     }
 
@@ -127,6 +118,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ImageCaptured = BitmapFactory.decodeStream(imageStream);
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(fileUri.getPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED);
+        ImageCaptured = rotateBitmap(ImageCaptured, orientation);
+        if(ImageCaptured.getWidth() > MAX_BITMAP_SIZE || ImageCaptured.getHeight() > MAX_BITMAP_SIZE){
+            ImageCaptured = getResizedBitmap(ImageCaptured);
+        }
         return ImageCaptured;
     }
 
@@ -185,12 +188,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void takeCameraPhoto(){
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        imageUri = imageHandle.getOutputMediaFileUri(imageHandle.MEDIA_TYPE_IMAGE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -203,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            /*
             case R.id.action_capture:
                 takeCameraPhoto();
                 return true;
@@ -212,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_confirm:
                 uploadImage(croppedImage);
                 return true;
+             */
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -221,14 +221,6 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Point> path = canvas.getSwipePathImage();
         Bitmap result = WImgProc.process(image, path);
         croppedImage = result;
-        //canvas.resetCanvas();
-        //
-        // canvas.setImageBitmap(image);
-
-        /*
-        ImageView alter = (ImageView)findViewById(R.id.second);
-        alter.setImageBitmap(result);
-        */
         uploadImage(croppedImage);
     }
 
@@ -311,5 +303,6 @@ public class MainActivity extends AppCompatActivity {
         return imageBytes;
 
     }
+
 
 }

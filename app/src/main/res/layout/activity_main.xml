@@ -9,47 +9,10 @@
     android:layout_margin="0dp"
     android:padding="0dp"
     tools:context="in.ac.iiit.cvit.wordhelp.MainActivity">
-    <!--
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/my_toolbar"
+    <in.ac.iiit.cvit.wordhelp.TouchImageView
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
-        />
-    -->
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_weight="8"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <in.ac.iiit.cvit.wordhelp.TouchImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="0dp"
-            android:id="@+id/canvas" />
-    </LinearLayout>
-
-    <!--
-    <ImageView
-        android:id="@+id/second"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    -->
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_weight="2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/sendToServer"
-            android:text="Done"
-            android:onClick="process"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
+        android:layout_height="match_parent"
+        android:padding="0dp"
+        android:id="@+id/canvas" />
 
 </LinearLayout>
