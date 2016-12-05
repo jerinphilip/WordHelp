@@ -26,6 +26,7 @@ class WUtils {
     }
 
 
+
     public static void debugPoints(ArrayList<Point> Points){
         for(Point p: Points){
             Log.d("DebugAlist<P>", toString(p));

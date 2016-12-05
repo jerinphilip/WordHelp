@@ -4,7 +4,6 @@ package in.ac.iiit.cvit.wordhelp;
  * Created by jerin on 26/10/16.
  */
 
-import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -14,56 +13,60 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ImageHandle {
-    private Uri fileUri;
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
+    boolean ready;
+    File mediaStorageDir;
+    File subMediaStorageDir;
 
-    public Uri getOutputMediaFileUri(int type) {
-        return Uri.fromFile(getOutputMediaFile(type));
-    }
-
-    public Uri getUri(){
-        return fileUri;
-    }
-
-    /**
-     * Create a File for saving an image or video
-     */
-    private static File getOutputMediaFile(int type) {
+    public ImageHandle(){
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
-
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+        mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "WordHelp");
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
 
-        // Create the storage directory if it does not exist
+        subMediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "WordHelp/sub");
+        ready = true;
+
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 Log.d("WordHelp", "failed to create directory");
-                return null;
+                ready = false;
+            }
+        }
+        if (!subMediaStorageDir.exists()) {
+            if (!subMediaStorageDir.mkdirs()) {
+                Log.d("WordHelp", "failed to create directory");
+                ready = false;
             }
         }
 
-        // Create a media file name
+    }
+
+    public File newImage(){
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_" + timeStamp + ".jpg");
-        } else if (type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_" + timeStamp + ".mp4");
-        } else {
-            return null;
-        }
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                "IMG_" + timeStamp + ".jpg");
+        return mediaFile;
+    }
 
+    public File newWordImage(){
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        mediaFile = new File(subMediaStorageDir.getPath() + File.separator +
+                "SUBIMG_" + timeStamp + ".jpg");
+        return mediaFile;
+    }
+    public File newVideo(){
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                "VID_" + timeStamp + ".mp4");
         return mediaFile;
     }
 
 
-    public static ArrayList<File> getImageList(){
+    public ArrayList<File> getImageList(){
         ArrayList<File> ls = new ArrayList<>();
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "WordHelp");
@@ -77,5 +80,7 @@ public class ImageHandle {
         return ls;
 
     }
+
+
 }
 

@@ -180,16 +180,6 @@ public class TouchImageView extends ImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawPath(swipe, paint);
-
-        /* */
-        Drawable image = getDrawable();
-        int width, height;
-        width = image.getIntrinsicWidth();
-        height = image.getIntrinsicHeight();
-
-        RectF bbox = WUtils.boundingBox(swipePath, width, height);
-        //matrix.A.mapRect(bbox, bbox);
-        //canvas.drawRect(bbox, paint);
     }
 
     @Override

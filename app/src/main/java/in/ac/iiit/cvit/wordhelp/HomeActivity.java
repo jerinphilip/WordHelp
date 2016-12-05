@@ -50,21 +50,16 @@ public class HomeActivity extends AppCompatActivity {
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflates the menu from res/menu/toolbar.xml
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.toolbar, menu);
         return true;
     }
 
-    public void viewSample(View v){
-        Intent touchImageView = new Intent(this, CanvasActivity.class);
-        startActivity(touchImageView);
-    }
 
 
     private void takeCameraPhoto(){
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        imageUri = imageHandle.getOutputMediaFileUri(imageHandle.MEDIA_TYPE_IMAGE);
+        imageUri = Uri.fromFile(imageHandle.newImage());
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         startActivityForResult(cameraIntent, CAPTURE_IMAGE);
     }
@@ -106,7 +101,6 @@ public class HomeActivity extends AppCompatActivity {
                 Intent touchImageview = new Intent(this, CanvasActivity.class);
                 touchImageview.putExtras(bundle);
                 startActivity(touchImageview);
-
             }
         }
 

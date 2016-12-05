@@ -5,8 +5,10 @@ import android.graphics.Point;
 import android.util.Log;
 
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -71,6 +73,9 @@ public class WImgProc {
         img = new Mat(original, bbox);
         Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
         Imgproc.threshold(img, img, 127, 255, Imgproc.THRESH_OTSU);
+        int border = 2;
+
+        Core.copyMakeBorder(img, img, border, border, border, border, Core.BORDER_CONSTANT, new Scalar(255));
         bmp = Bitmap.createBitmap(bmp, 0, 0, img.cols(), img.rows());
         Utils.matToBitmap(img, bmp);
         Log.d("Image Dimensions", WUtils.toString(new Point(img.cols(), img.rows())));

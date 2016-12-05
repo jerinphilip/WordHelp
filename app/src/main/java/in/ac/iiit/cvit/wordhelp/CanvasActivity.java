@@ -11,9 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -22,16 +19,16 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
 public class CanvasActivity extends AppCompatActivity{
-    ImageHandle imageHandle;
-    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private static int MAX_BITMAP_SIZE = 1280;
-    private Uri imageUri;
     Bitmap image;
     Bitmap croppedImage;
     TouchImageView canvas;
@@ -175,45 +172,36 @@ public class CanvasActivity extends AppCompatActivity{
     }
 
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflates the menu from res/menu/toolbar.xml
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbar, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            /*
-            case R.id.action_capture:
-                takeCameraPhoto();
-                return true;
-            case R.id.action_crop:
-                //process();
-                return true;
-            case R.id.action_confirm:
-                uploadImage(croppedImage);
-                return true;
-             */
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     public void process(View v){
         ArrayList<Point> path = canvas.getSwipePathImage();
         Bitmap result = WImgProc.process(image, path);
         croppedImage = result;
-        launchDetails();
+
+        ImageHandle imageHandle = new ImageHandle();
+
+        File subImg = imageHandle.newWordImage();
+
+        try {
+            FileOutputStream fout = new FileOutputStream(subImg);
+            fout.write(getImageBinary(croppedImage));
+            Uri furi = Uri.fromFile(subImg);
+            launchDetails(furi);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void launchDetails(){
+    public byte[] getImageBinary(Bitmap img) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        img.compress(Bitmap.CompressFormat.PNG,100,baos);
+        byte[] imageBytes = baos.toByteArray();
+        return imageBytes;
+    }
+
+    public void launchDetails(Uri furi){
         Intent intent = new Intent(this, InfoActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putParcelable("resultImage", croppedImage);
+        bundle.putParcelable("resultImageUri", furi);
         intent.putExtras(bundle);
         startActivity(intent);
     }
