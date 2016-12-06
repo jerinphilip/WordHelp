@@ -29,11 +29,14 @@ import okhttp3.Response;
 
 public class InfoActivity extends Activity {
     private static int MAX_BITMAP_SIZE = 1280;
+    private DbApi db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
+
+        db = new DbApi(getApplicationContext());
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null && bundle.containsKey("resultImageUri")){

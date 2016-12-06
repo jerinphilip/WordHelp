@@ -71,10 +71,12 @@ public class ImageHandle {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "WordHelp");
         File[] files = mediaStorageDir.listFiles();
-        for(File file: files){
-            if(!file.isDirectory()){
-                ls.add(file);
-                Log.d("FILE", file.getName());
+        if(files!=null){
+            for(File file: files){
+                if(!file.isDirectory()){
+                    ls.add(file);
+                    Log.d("FILE", file.getName());
+                }
             }
         }
         return ls;

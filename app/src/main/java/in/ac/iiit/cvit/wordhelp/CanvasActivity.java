@@ -1,5 +1,6 @@
 package in.ac.iiit.cvit.wordhelp;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +9,7 @@ import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -32,7 +34,8 @@ public class CanvasActivity extends AppCompatActivity{
     Bitmap image;
     Bitmap croppedImage;
     TouchImageView canvas;
-
+    DbApi db;
+    Uri imageUri;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -59,11 +62,8 @@ public class CanvasActivity extends AppCompatActivity{
 
         Bundle bundle = this.getIntent().getExtras();
         if(bundle!= null && bundle.containsKey("imageUri")) {
-            Uri imageUri = bundle.getParcelable("imageUri");
+            imageUri = bundle.getParcelable("imageUri");
             image = loadBitmap(imageUri);
-        }
-        else {
-            image = ((BitmapDrawable) getDrawable(R.drawable.lorem)).getBitmap();
         }
         canvas = (TouchImageView)findViewById(R.id.canvas);
         canvas.setOnImageChangedListener(new TouchImageView.OnImageChangedListener() {
@@ -74,6 +74,7 @@ public class CanvasActivity extends AppCompatActivity{
         });
         canvas.setImageBitmap(image);
 
+        db = new DbApi(getApplicationContext());
 
     }
 
@@ -174,21 +175,8 @@ public class CanvasActivity extends AppCompatActivity{
 
     public void process(View v){
         ArrayList<Point> path = canvas.getSwipePathImage();
-        Bitmap result = WImgProc.process(image, path);
-        croppedImage = result;
+       (new ImageProcessTask(image, path)).execute();
 
-        ImageHandle imageHandle = new ImageHandle();
-
-        File subImg = imageHandle.newWordImage();
-
-        try {
-            FileOutputStream fout = new FileOutputStream(subImg);
-            fout.write(getImageBinary(croppedImage));
-            Uri furi = Uri.fromFile(subImg);
-            launchDetails(furi);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public byte[] getImageBinary(Bitmap img) {
@@ -204,5 +192,55 @@ public class CanvasActivity extends AppCompatActivity{
         bundle.putParcelable("resultImageUri", furi);
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    private class ImageProcessTask extends AsyncTask<Void, Integer, Bitmap>{
+        Bitmap query;
+        ArrayList<Point> query_path;
+        ProgressDialog progressDialog;
+
+
+        public ImageProcessTask(Bitmap _query, ArrayList<Point> _query_path){
+            query = _query;
+            query_path = _query_path;
+        }
+
+        ProgressDialog pd;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = new ProgressDialog(CanvasActivity.this);
+            progressDialog.setMessage("Processing");
+            progressDialog.show();
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... params){
+            return WImgProc.process(query, query_path);
+        }
+        @Override
+        protected void onPostExecute(Bitmap bmp){
+            croppedImage = bmp;
+            ImageHandle imageHandle = new ImageHandle();
+
+            File subImg = imageHandle.newWordImage();
+
+            try {
+                FileOutputStream fout = new FileOutputStream(subImg);
+                fout.write(getImageBinary(croppedImage));
+                Uri furi = Uri.fromFile(subImg);
+                db.add_entry(imageUri.getPath(), Uri.fromFile(subImg).getPath());
+                launchDetails(furi);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (progressDialog != null)
+            {
+                progressDialog.dismiss();
+            }
+        }
+
+
+
     }
 }

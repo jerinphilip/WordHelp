@@ -13,6 +13,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 /**
@@ -20,6 +22,31 @@ import java.util.Stack;
  */
 
 public class WImgProc {
+
+    public static Point findNearestForeground(Mat img, Point p){
+        int H, W;
+        H = img.rows();
+        W = img.cols();
+        int UNTOUCHED = 0, MARKED = 1, VISITED = 2;
+
+        int[][] color = new int[H][W];
+        Queue<Point> Q;
+        Q = new LinkedList<>();
+        Q.add(p);
+        while(!Q.isEmpty()) {
+            Point u = Q.remove();
+            color[u.y][u.x] = VISITED;
+            if(img.get(u.y, u.x)[0] == 0)
+                return u;
+            for (Point v : neighbours(u, W, H)){
+                if(color[v.y][v.x] == UNTOUCHED){
+                    Q.add(v);
+                    color[v.y][v.x] = MARKED;
+                }
+            }
+        }
+        return p;
+    }
     public static Bitmap process(Bitmap bmp, ArrayList<Point> swipePath){
         Mat img = new Mat();
         Utils.bitmapToMat(bmp, img);
@@ -38,11 +65,12 @@ public class WImgProc {
         Imgproc.resize(img, img, new Size(), scale, scale, Imgproc.INTER_CUBIC);
 
         if (swipePath.size() == 1){
+            /*
             ArrayList<Point> P = neighbours(swipePath.get(0), img.rows(), img.cols());
             for(Point p: P){
                 swipePath.add(p);
-            }
-
+            }*/
+            swipePath.add(findNearestForeground(img, swipePath.get(0)));
         }
 
         ArrayList<Point> scaledSwipePath = new ArrayList<>();
@@ -73,10 +101,10 @@ public class WImgProc {
         img = new Mat(original, bbox);
         Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
         Imgproc.threshold(img, img, 127, 255, Imgproc.THRESH_OTSU);
-        int border = 2;
+        int border = 20;
 
         Core.copyMakeBorder(img, img, border, border, border, border, Core.BORDER_CONSTANT, new Scalar(255));
-        bmp = Bitmap.createBitmap(bmp, 0, 0, img.cols(), img.rows());
+        bmp = Bitmap.createBitmap(img.cols(), img.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(img, bmp);
         Log.d("Image Dimensions", WUtils.toString(new Point(img.cols(), img.rows())));
         return bmp;
