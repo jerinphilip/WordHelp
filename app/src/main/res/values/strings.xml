@@ -9,6 +9,6 @@
 
     <string name="powered_by">Powered By</string>
     <string name="title_activity_home">Home</string>
-    <string name="title_activity_info">InfoActivity</string>
+    <string name="title_activity_info">Results</string>
 
 </resources>

@@ -36,7 +36,7 @@ public class WImgProc {
         while(!Q.isEmpty()) {
             Point u = Q.remove();
             color[u.y][u.x] = VISITED;
-            if(img.get(u.y, u.x)[0] == 0)
+            if(((int)(Math.round(img.get(u.y, u.x)[0]))) == 0)
                 return u;
             for (Point v : neighbours(u, W, H)){
                 if(color[v.y][v.x] == UNTOUCHED){
@@ -54,24 +54,30 @@ public class WImgProc {
         Imgproc.threshold(img, img, 127, 255, Imgproc.THRESH_OTSU);
         Imgproc.erode(img, img, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3,3)));
 
+        if (swipePath.size() == 1){
+            Point x = findNearestForeground(img, swipePath.get(0));
+            swipePath.clear();
+            swipePath.add(x);
+
+            ArrayList<Point> P = neighbours(swipePath.get(0), img.rows(), img.cols());
+            for(Point p: P){
+                swipePath.add(p);
+            }
+
+        }
         // Downsample.
         // Processing is done on an image of size 640x640 tops.
         double MAX_SIZE = 640;
         double wScale = MAX_SIZE/(double)img.width();
         double hScale = MAX_SIZE/(double)img.height();
 
+
+
         double scale = Math.min(wScale, hScale);
         Log.d("Scale", String.valueOf(scale));
         Imgproc.resize(img, img, new Size(), scale, scale, Imgproc.INTER_CUBIC);
 
-        if (swipePath.size() == 1){
-            /*
-            ArrayList<Point> P = neighbours(swipePath.get(0), img.rows(), img.cols());
-            for(Point p: P){
-                swipePath.add(p);
-            }*/
-            swipePath.add(findNearestForeground(img, swipePath.get(0)));
-        }
+
 
         ArrayList<Point> scaledSwipePath = new ArrayList<>();
         for(Point p: swipePath){

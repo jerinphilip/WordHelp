@@ -229,7 +229,7 @@ public class CanvasActivity extends AppCompatActivity{
                 FileOutputStream fout = new FileOutputStream(subImg);
                 fout.write(getImageBinary(croppedImage));
                 Uri furi = Uri.fromFile(subImg);
-                db.add_entry(imageUri.getPath(), Uri.fromFile(subImg).getPath());
+                //db.add_entry(imageUri.getPath(), Uri.fromFile(subImg).getPath());
                 launchDetails(furi);
             } catch (IOException e) {
                 e.printStackTrace();

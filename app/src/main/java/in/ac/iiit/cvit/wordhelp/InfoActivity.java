@@ -5,18 +5,21 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.ExifInterface;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -27,30 +30,70 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class InfoActivity extends Activity {
+public class InfoActivity extends AppCompatActivity {
     private static int MAX_BITMAP_SIZE = 1280;
     private DbApi db;
+    Dictionary D;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
-
+        InputStream is = getResources().openRawResource(R.raw.dictionary);
+        D = new Dictionary(is);
         db = new DbApi(getApplicationContext());
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null && bundle.containsKey("resultImageUri")){
             Uri resultImageUri = bundle.getParcelable("resultImageUri");
             Bitmap resultImage = loadBitmap(resultImageUri);
+            deleteImage(resultImageUri);
             uploadImage(resultImage);
-            ImageView preview = (ImageView)findViewById(R.id.preview);
-            preview.setImageBitmap(resultImage);
+            //ImageView preview = (ImageView)findViewById(R.id.preview);
+            //preview.setImageBitmap(resultImage);
+        }
+
+
+    }
+
+    public void deleteImage(Uri uri){
+        File fdelete = new File(uri.getPath());
+        if (fdelete.exists()) {
+            if (fdelete.delete()) {
+                //System.out.println("file Deleted :" + uri.getPath());
+            } else {
+                //System.out.println("file not Deleted :" + uri.getPath());
+            }
         }
     }
 
-    public void updateTextArea(String output){
-        TextView textView = (TextView)findViewById(R.id.output);
-        textView.setText(output);
+    public void updateContent(String output){
+        String[] words = output.split(" ");
+        ArrayList<InfoEntry> entries = new ArrayList<>();
+        for(String word: words){
+            word = word.replace(" ", "");
+            if(word != null && !word.isEmpty()) {
+                ArrayList<String> meanings = D.getMeaning(word);
+                if(!meanings.isEmpty()) {
+                    InfoEntry infoEntry = new InfoEntry(word, meanings);
+                    entries.add(infoEntry);
+                }
+            }
+        }
+
+        RecyclerView rvInfoEntry = (RecyclerView) findViewById(R.id.rv_info_entry);
+
+        // Initialize contacts
+
+        // Create adapter passing in the sample user data
+        InfoEntryAdapter adapter = new InfoEntryAdapter(this, entries);
+        // Attach the adapter to the recyclerview to populate items
+        rvInfoEntry.setAdapter(adapter);
+        // Set layout manager to position the items
+        rvInfoEntry.setLayoutManager(new LinearLayoutManager(this));
+
     }
 
     public void uploadImage(Bitmap img) {
@@ -91,7 +134,8 @@ public class InfoActivity extends Activity {
                         @Override
                         public void run() {
                             Log.d("response", output);
-                            updateTextArea(output);
+                            updateContent(output);
+
 
                         }
                     });
