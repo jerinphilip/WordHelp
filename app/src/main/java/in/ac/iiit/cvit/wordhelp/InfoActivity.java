@@ -1,5 +1,6 @@
 package in.ac.iiit.cvit.wordhelp;
 
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -117,17 +118,23 @@ public class InfoActivity extends AppCompatActivity {
                 .build();
 
         Call call = client.newCall(request);
+        final ProgressDialog progressDialog = new ProgressDialog(InfoActivity.this);
+        progressDialog.setMessage("Sending to server");
+        progressDialog.show();
 
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                /*Toast.makeText(CanvasActivity.this, "Aaaaand you failed", Toast.LENGTH_LONG).show();*/
+                progressDialog.dismiss();
             }
+
+
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final Response resp = response;
                 final String output = resp.body().string();
+                progressDialog.dismiss();
                 if (response.isSuccessful()) {
 
                     runOnUiThread(new Runnable() {
@@ -135,7 +142,6 @@ public class InfoActivity extends AppCompatActivity {
                         public void run() {
                             Log.d("response", output);
                             updateContent(output);
-
 
                         }
                     });
