@@ -26,10 +26,12 @@ public class HomeActivity extends AppCompatActivity {
     Uri imageUri;
     private static final int CAPTURE_IMAGE = 100;
     private static final int PICK_IMAGE = 101;
-    ArrayList<File> historyFiles;
+    ArrayList<History> historyFiles;
 
     private static final int REQUEST_WRITE = 102;
     private static final int REQUEST_CAMERA = 103;
+
+    private HistoryAdapter historyAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +55,19 @@ public class HomeActivity extends AppCompatActivity {
         imageHandle = new ImageHandle();
         historyFiles = imageHandle.getImageList();
         RecyclerView history = (RecyclerView)findViewById(R.id.history);
-        HistoryAdapter historyAdapter = new HistoryAdapter(this, historyFiles);
+        historyAdapter = new HistoryAdapter(this, historyFiles);
         history.setAdapter(historyAdapter);
         history.setLayoutManager(new LinearLayoutManager(this));
 
     }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        historyFiles = imageHandle.getImageList();
+        historyAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();

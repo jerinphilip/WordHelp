@@ -63,6 +63,7 @@ public class CanvasActivity extends AppCompatActivity{
         Bundle bundle = this.getIntent().getExtras();
         if(bundle!= null && bundle.containsKey("imageUri")) {
             imageUri = bundle.getParcelable("imageUri");
+            Log.d("ImageURI", imageUri.getPath());
             image = loadBitmap(imageUri);
         }
         canvas = (TouchImageView)findViewById(R.id.canvas);

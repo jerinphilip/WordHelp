@@ -66,15 +66,16 @@ public class ImageHandle {
     }
 
 
-    public ArrayList<File> getImageList(){
-        ArrayList<File> ls = new ArrayList<>();
+    public ArrayList<History> getImageList(){
+        ArrayList<History> ls = new ArrayList<>();
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "WordHelp");
         File[] files = mediaStorageDir.listFiles();
         if(files!=null){
             for(File file: files){
                 if(!file.isDirectory()){
-                    ls.add(file);
+                    History history = new History(file);
+                    ls.add(history);
                     Log.d("FILE", file.getName());
                 }
             }
